@@ -1,18 +1,17 @@
-"""Database setup"""
-
 from pathlib import Path
 import os
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-# Absolute path to backend folder
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-# Database file inside backend folder
 DB_PATH = BASE_DIR / "ethara.db"
 
-DATABASE_URL = f"sqlite:///{DB_PATH}"
+# USE RAILWAY DATABASE IF AVAILABLE
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    f"sqlite:///{DB_PATH}"
+)
 
 # Railway postgres fix
 if DATABASE_URL.startswith("postgres://"):
@@ -22,9 +21,13 @@ if DATABASE_URL.startswith("postgres://"):
         1
     )
 
-connect_args = {
-    "check_same_thread": False
-}
+connect_args = {}
+
+# SQLite only
+if DATABASE_URL.startswith("sqlite"):
+    connect_args = {
+        "check_same_thread": False
+    }
 
 engine = create_engine(
     DATABASE_URL,
